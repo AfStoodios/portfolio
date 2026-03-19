@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AF Photography — Al Furman</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 var(--gutter);
+      padding-top: 90px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -120px; right: -80px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(168,213,181,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--mint);
+      margin-bottom: 1.2rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.2s forwards;
+    }
+    .hero-headline {
+      font-family: var(--font-display);
+      font-size: clamp(5rem, 12vw, 11rem);
+      line-height: 0.9;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.35s forwards;
+    }
+    .hero-headline .italic {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      color: var(--mint);
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      display: block;
+    }
+    .hero-tagline {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--text-muted);
+      max-width: 500px;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.5s forwards;
+    }
+    .hero-tagline strong { color: var(--text-secondary); font-style: normal; font-weight: 400; }
+    .hero-actions {
+      display: flex; gap: 1rem; align-items: center;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.65s forwards;
+    }
+    .hero-scroll {
+      position: absolute;
+      bottom: 2.5rem; left: var(--gutter);
+      display: flex; align-items: center; gap: 0.8rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 1s forwards;
+    }
+    .hero-scroll-line {
+      width: 40px; height: 1px;
+      background: var(--border);
+    }
+    .hero-scroll span {
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* FEATURED STRIP */
+    .featured {
+      padding: 5rem var(--gutter);
+      border-top: 1px solid var(--border);
+    }
+    .featured-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--mint);
+      margin-bottom: 2rem;
+    }
+    .featured-grid {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr 1fr;
+      grid-template-rows: 240px 180px;
+      gap: 4px;
+    }
+    .feat-cell {
+      background: var(--surface);
+      border-radius: 3px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .feat-cell.tall { grid-row: span 2; }
+    .feat-cell img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .feat-cell:hover img { transform: scale(1.04); }
+    .feat-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(26,26,30,0.75) 0%, transparent 55%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 1.2rem;
+    }
+    .feat-cell:hover .feat-overlay { opacity: 1; }
+    .feat-tag {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mint);
+      margin-bottom: 0.2rem;
+    }
+    .feat-title {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+    /* Placeholder photo styles */
+    .photo-placeholder {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 0.5rem;
+    }
+    .photo-placeholder svg { opacity: 0.12; }
+    .photo-placeholder span {
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .ph-1 { background: linear-gradient(145deg, #2e2e33, #3a3a3f); }
+    .ph-2 { background: linear-gradient(145deg, #313136, #2c2c30); }
+    .ph-3 { background: linear-gradient(145deg, #2a2a2e, #363638); }
+    .ph-4 { background: linear-gradient(145deg, #333338, #2e2e32); }
+    .ph-5 { background: linear-gradient(145deg, #303035, #3c3c40); }
+
+    .view-all-row {
+      margin-top: 2rem;
+      display: flex; justify-content: flex-end;
+    }
+
+    /* ABOUT TEASER */
+    .about-teaser {
+      padding: 5rem var(--gutter);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .about-img {
+      aspect-ratio: 4/5;
+      background: var(--surface);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .about-img-inner {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 0.5rem;
+    }
+    .about-img-inner svg { opacity: 0.1; }
+    .about-img-inner span { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+    .about-img::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 40%;
+      background: linear-gradient(to top, var(--bg), transparent);
+    }
+    .about-text .section-label { margin-bottom: 1rem; }
+    .about-text h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 1.5rem;
+    }
+    .about-text h2 em {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      color: var(--mint);
+    }
+    .about-text p {
+      font-size: 0.92rem;
+      line-height: 1.9;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    /* SERVICES TEASER */
+    .services-teaser {
+      padding: 5rem var(--gutter);
+      border-top: 1px solid var(--border);
+    }
+    .services-teaser .section-label { margin-bottom: 2rem; }
+    .services-teaser h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 3rem;
+    }
+    .services-teaser h2 em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--mint); }
+    .services-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .service-item {
+      padding: 2rem;
+      border-right: 1px solid var(--border);
+      transition: background 0.25s;
+    }
+    .service-item:last-child { border-right: none; }
+    .service-item:hover { background: var(--surface-hover); }
+    .service-num {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      color: var(--border-strong);
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+    .service-name {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.3rem;
+      color: var(--text-primary);
+      margin-bottom: 0.8rem;
+    }
+    .service-desc {
+      font-size: 0.8rem;
+      line-height: 1.8;
+      color: var(--text-muted);
+    }
+
+    /* CTA BAND */
+    .cta-band {
+      margin: 0 var(--gutter) 5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+    .cta-band h3 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+    .cta-band h3 em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--mint); }
+    .cta-band p { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+    @media (max-width: 768px) {
+      .featured-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+      .feat-cell.tall { grid-row: span 1; }
+      .about-teaser { grid-template-columns: 1fr; }
+      .services-strip { grid-template-columns: 1fr; }
+      .service-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .service-item:last-child { border-bottom: none; }
+      .cta-band { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">AF<span>.</span></a>
+    <ul class="nav-links">
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="services.html">Services</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <a href="contact.html" class="btn btn-primary nav-cta">Book a Shoot</a>
+  </nav>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <p class="hero-eyebrow">Al Furman · Street &amp; Landscape Photography</p>
+      <h1 class="hero-headline">
+        IT WILL<br>
+        <span class="italic">last longer.</span>
+      </h1>
+      <p class="hero-tagline">
+        <strong>Go ahead, take a picture —</strong> I'll make sure it's one worth keeping.
+        Real moments. Real light. Cities, streets, and the world as it actually is.
+      </p>
+      <div class="hero-actions">
+        <a href="gallery.html" class="btn btn-primary">View My Work</a>
+        <a href="contact.html" class="btn btn-ghost">Get in Touch</a>
+      </div>
+      <div class="hero-scroll">
+        <div class="hero-scroll-line"></div>
+        <span>Scroll to explore</span>
+      </div>
+    </section>
+
+    <!-- FEATURED -->
+    <section class="featured reveal">
+      <p class="featured-label">— Featured Work</p>
+      <div class="featured-grid">
+        <div class="feat-cell tall ph-1" onclick="window.location='gallery.html'">
+          <div class="photo-placeholder">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Your photo here</span>
+          </div>
+          <div class="feat-overlay">
+            <span class="feat-tag">Street</span>
+            <span class="feat-title">Rush Hour, Downtown</span>
+          </div>
+        </div>
+        <div class="feat-cell ph-2" onclick="window.location='gallery.html'">
+          <div class="photo-placeholder">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Your photo here</span>
+          </div>
+          <div class="feat-overlay">
+            <span class="feat-tag">Landscape</span>
+            <span class="feat-title">Golden Horizon</span>
+          </div>
+        </div>
+        <div class="feat-cell ph-3" onclick="window.location='gallery.html'">
+          <div class="photo-placeholder">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Your photo here</span>
+          </div>
+          <div class="feat-overlay">
+            <span class="feat-tag">Street</span>
+            <span class="feat-title">The Corner</span>
+          </div>
+        </div>
+        <div class="feat-cell ph-4" onclick="window.location='gallery.html'">
+          <div class="photo-placeholder">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Your photo here</span>
+          </div>
+          <div class="feat-overlay">
+            <span class="feat-tag">Wedding</span>
+            <span class="feat-title">First Dance</span>
+          </div>
+        </div>
+        <div class="feat-cell ph-5" onclick="window.location='gallery.html'">
+          <div class="photo-placeholder">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Your photo here</span>
+          </div>
+          <div class="feat-overlay">
+            <span class="feat-tag">Landscape</span>
+            <span class="feat-title">Mountain Fog</span>
+          </div>
+        </div>
+      </div>
+      <div class="view-all-row">
+        <a href="gallery.html" class="btn btn-ghost">View Full Gallery →</a>
+      </div>
+    </section>
+
+    <!-- ABOUT TEASER -->
+    <section class="about-teaser reveal">
+      <div class="about-img">
+        <div class="about-img-inner">
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="0.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <span>Your portrait here</span>
+        </div>
+      </div>
+      <div class="about-text">
+        <p class="section-label">— About Al</p>
+        <h2>The eye<br><em>behind the lens</em></h2>
+        <p>Hey, I'm Al Furman — a street and landscape photographer based out of my love for the unscripted world. I got into photography because I believe every ordinary moment deserves to be remembered extraordinarily. Whether it's a stranger's glance on a busy street or the light hitting a mountain just right at dawn, I'm there for it.</p>
+        <p>No budget is too small, no story too simple. Let's work together and make something that lasts.</p>
+        <a href="about.html" class="btn btn-ghost">More About Me →</a>
+      </div>
+    </section>
+
+    <!-- SERVICES TEASER -->
+    <section class="services-teaser reveal">
+      <p class="section-label">— What I Do</p>
+      <h2>Built around <em>your</em> vision</h2>
+      <div class="services-strip">
+        <div class="service-item">
+          <div class="service-num">01</div>
+          <div class="service-name">Street & Documentary</div>
+          <p class="service-desc">Candid, real, alive. I capture the energy of the city and the people in it.</p>
+        </div>
+        <div class="service-item">
+          <div class="service-num">02</div>
+          <div class="service-name">Landscape & Travel</div>
+          <p class="service-desc">From mountain ridges to golden coastlines — natural beauty, beautifully preserved.</p>
+        </div>
+        <div class="service-item">
+          <div class="service-num">03</div>
+          <div class="service-name">Weddings & Events</div>
+          <p class="service-desc">Your biggest moments, captured with care. Documentary-style coverage that feels natural.</p>
+        </div>
+      </div>
+      <div style="margin-top: 2rem;">
+        <a href="services.html" class="btn btn-ghost">See Full Services →</a>
+      </div>
+    </section>
+
+    <!-- CTA BAND -->
+    <div class="cta-band reveal">
+      <div>
+        <h3>Let's make<br>something <em>real.</em></h3>
+        <p>Whatever your budget, whatever your vision — I'm in.</p>
+      </div>
+      <a href="contact.html" class="btn btn-primary">Start a Conversation</a>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span class="footer-logo">AF<span>.</span>PHOTOGRAPHY</span>
+    <span class="footer-copy">© 2026 Al Furman — All rights reserved</span>
+    <div class="footer-links">
+      <a href="https://instagram.com/Alsphotos_" target="_blank">@Alsphotos_</a>
+    </div>
+  </footer>
+
+  <script src="shared.js"></script>
+</body>
+</html>

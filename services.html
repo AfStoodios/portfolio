@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Services — AF Photography</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .services-section { padding: 4rem var(--gutter) 6rem; }
+
+    /* BUDGET BANNER */
+    .budget-banner {
+      background: var(--mint-dim);
+      border: 1px solid rgba(168,213,181,0.2);
+      border-radius: 4px;
+      padding: 1.2rem 1.8rem;
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 3.5rem;
+    }
+    .budget-banner .bb-icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(168,213,181,0.2);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .budget-banner .bb-icon svg { width: 16px; height: 16px; }
+    .budget-banner p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .budget-banner p strong { color: var(--mint); font-weight: 500; }
+
+    /* SERVICE CARDS */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 4rem;
+    }
+    .service-card {
+      background: var(--bg);
+      padding: 2.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: transparent;
+      transition: background 0.3s;
+    }
+    .service-card:hover { background: var(--surface); }
+    .service-card:hover::before { background: var(--mint); }
+
+    .s-num {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      color: var(--border-strong);
+      line-height: 1;
+      margin-bottom: 1.2rem;
+    }
+    .s-name {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      margin-bottom: 0.8rem;
+    }
+    .s-desc {
+      font-size: 0.82rem;
+      line-height: 1.85;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+    .s-includes-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--mint);
+      margin-bottom: 0.8rem;
+    }
+    .s-includes { display: flex; flex-direction: column; gap: 0.4rem; }
+    .s-include-item {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .s-include-item::before {
+      content: '';
+      width: 14px; height: 1px;
+      background: var(--mint);
+      flex-shrink: 0;
+    }
+    .s-enquire {
+      margin-top: 2rem;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .s-enquire:hover { color: var(--mint); }
+    .s-enquire .arrow { transition: transform 0.2s; }
+    .s-enquire:hover .arrow { transform: translateX(3px); }
+
+    /* FAQ */
+    .faq-section {
+      border-top: 1px solid var(--border);
+      padding-top: 3.5rem;
+    }
+    .faq-section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      color: var(--text-primary);
+      margin-bottom: 2.5rem;
+    }
+    .faq-section h2 em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--mint); }
+    .faq-list { display: flex; flex-direction: column; gap: 0; }
+    .faq-item {
+      border-top: 1px solid var(--border);
+      padding: 1.4rem 0;
+    }
+    .faq-item:last-child { border-bottom: 1px solid var(--border); }
+    .faq-q {
+      font-size: 0.92rem;
+      color: var(--text-primary);
+      font-weight: 500;
+      cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem;
+    }
+    .faq-q .faq-icon { color: var(--mint); font-size: 1.2rem; transition: transform 0.3s; flex-shrink: 0; }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-a {
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--text-muted);
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s;
+    }
+    .faq-item.open .faq-a { max-height: 200px; padding-top: 0.8rem; }
+
+    @media (max-width: 900px) {
+      .services-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">AF<span>.</span></a>
+    <ul class="nav-links">
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="services.html">Services</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <a href="contact.html" class="btn btn-primary nav-cta">Book a Shoot</a>
+  </nav>
+
+  <div class="page-hero">
+    <p class="section-label">— Services</p>
+    <h1>What I <em>offer</em></h1>
+    <p>Every shoot is a collaboration. Tell me what you need and we'll figure out something that works for both of us.</p>
+  </div>
+
+  <section class="services-section">
+
+    <div class="budget-banner reveal">
+      <div class="bb-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a8d5b5" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <p><strong>No budget? No problem.</strong> I genuinely believe photography should be accessible to everyone. Whether you have a big budget or a small one, reach out and let's talk — I'll always do my best to work with you.</p>
+    </div>
+
+    <div class="services-grid reveal">
+
+      <div class="service-card">
+        <div class="s-num">01</div>
+        <div class="s-name">Street & Documentary</div>
+        <p class="s-desc">Candid, real, and alive. I hit the streets with you and capture the world as it is — no poses, no scripts, just authentic moments.</p>
+        <p class="s-includes-label">— Typically includes</p>
+        <div class="s-includes">
+          <div class="s-include-item">Half-day or full-day options</div>
+          <div class="s-include-item">Edited digital images delivered online</div>
+          <div class="s-include-item">Commercial licensing available</div>
+          <div class="s-include-item">Print-ready files</div>
+        </div>
+        <a href="contact.html" class="s-enquire">Enquire about this <span class="arrow">→</span></a>
+      </div>
+
+      <div class="service-card">
+        <div class="s-num">02</div>
+        <div class="s-name">Landscape & Travel</div>
+        <p class="s-desc">From mountain ridges to coastal sunrises — I find the frame that makes a landscape feel like a painting you can live inside.</p>
+        <p class="s-includes-label">— Typically includes</p>
+        <div class="s-includes">
+          <div class="s-include-item">Location scouting included</div>
+          <div class="s-include-item">Sunrise & golden hour coverage</div>
+          <div class="s-include-item">Fine art print options available</div>
+          <div class="s-include-item">High resolution files</div>
+        </div>
+        <a href="contact.html" class="s-enquire">Enquire about this <span class="arrow">→</span></a>
+      </div>
+
+      <div class="service-card">
+        <div class="s-num">03</div>
+        <div class="s-name">Weddings & Events</div>
+        <p class="s-desc">Documentary-style coverage that feels natural, not staged. Your biggest day captured the way it actually felt — real, warm, and full of life.</p>
+        <p class="s-includes-label">— Typically includes</p>
+        <div class="s-includes">
+          <div class="s-include-item">Full event coverage</div>
+          <div class="s-include-item">Online gallery delivery</div>
+          <div class="s-include-item">Sneak peek within 48hrs</div>
+          <div class="s-include-item">Flexible packages</div>
+        </div>
+        <a href="contact.html" class="s-enquire">Enquire about this <span class="arrow">→</span></a>
+      </div>
+
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq-section reveal">
+      <h2>Common <em>questions</em></h2>
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            How does pricing work if I have a tight budget?
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">Just reach out and be honest with me. I'd rather find a way to make it work than have you miss out on photos that matter to you. We can adjust scope, hours, or deliverables to fit what you can spend.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            How long does it take to receive my photos?
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">Typically 1–2 weeks for most shoots. Weddings and larger events may take up to 3 weeks. I always share a sneak peek within 48 hours so you have something to smile at while you wait.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            Do you travel for shoots?
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">Absolutely. Travel costs are discussed upfront and worked into the overall package so there are no surprises. Get in touch and let me know where you're thinking.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            Can I purchase prints of my photos?
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">Yes — fine art print options are available for all shoots. I work with quality print labs and can help you choose the right size and finish for your space.</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="footer">
+    <span class="footer-logo">AF<span>.</span>PHOTOGRAPHY</span>
+    <span class="footer-copy">© 2026 Al Furman — All rights reserved</span>
+    <div class="footer-links">
+      <a href="https://instagram.com/Alsphotos_" target="_blank">@Alsphotos_</a>
+    </div>
+  </footer>
+
+  <script src="shared.js"></script>
+  <script>
+    function toggleFaq(el) {
+      const item = el.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    }
+  </script>
+</body>
+</html>
