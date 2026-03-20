@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AF St00dios Logo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1a1e; }
+    .box { width: 100vmin; height: 100vmin; background: #1a1a1e; position: relative; overflow: hidden; }
+    .shutter-top, .shutter-bottom { position: absolute; left: 0; right: 0; background: #111; z-index: 20; }
+    .shutter-top { top: 0; height: 0; } .shutter-bottom { bottom: 0; height: 0; }
+    .flash { position: absolute; inset: 0; background: #fff; z-index: 15; opacity: 0; }
+    .stage { position: absolute; inset: 0; overflow: hidden; }
+    canvas { position: absolute; left: 0; top: 0; }
+    #sl { position: absolute; display: flex; align-items: center; white-space: nowrap; }
+    .st, .dt { font-family: 'Lora', 'Georgia', serif; font-weight: 700; color: #f0ede8; letter-spacing: 1px; line-height: 1; }
+    .eg { display: inline-flex; gap: 3px; align-items: center; }
+    .ey { border: 3px solid #f0ede8; border-radius: 50%; display: inline-flex; align-items: flex-end; justify-content: center; position: relative; overflow: hidden; background: #1a1a1e; flex-shrink: 0; }
+    .pu { background: #f0ede8; border-radius: 50%; flex-shrink: 0; }
+    .el { position: absolute; top: 0; left: -1px; right: -1px; height: 0; background: #1a1a1e; }
+  </style>
+</head>
+<body>
+  <div class="box" id="box">
+    <div class="flash" id="flash"></div>
+    <div class="shutter-top" id="shutTop"></div>
+    <div class="shutter-bottom" id="shutBot"></div>
+    <div class="stage">
+      <canvas id="c"></canvas>
+      <div id="sl">
+        <span class="st" id="stxt">st</span>
+        <span class="eg">
+          <span class="ey" id="e1"><span class="el" id="l1"></span><span class="pu" id="p1"></span></span>
+          <span class="ey" id="e2"><span class="el" id="l2"></span><span class="pu" id="p2"></span></span>
+        </span>
+        <span class="dt" id="dt">dios</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Size the canvas to match the box dynamically
+    const box = document.getElementById('box');
+    const canvas = document.getElementById('c');
+
+    function getSize() { return Math.min(window.innerWidth, window.innerHeight); }
+
+    let BOX = getSize();
+    canvas.width = BOX; canvas.height = BOX;
+    canvas.style.width = BOX+'px'; canvas.style.height = BOX+'px';
+    box.style.width = BOX+'px'; box.style.height = BOX+'px';
+
+    const BIG_FS_RATIO = 0.531;  // 170/320
+    const SMALL_FS_RATIO = 0.1375; // 44/320
+    const NUDGE_RATIO = 0.0125;  // 4/320
+    const DOT = 0.055;
+    const AF_HOLD = 125;
+    const SLIDE_MS = 1900;
+    const SHUTTER_MS = 120;
+
+    let BIG_FS = BOX * BIG_FS_RATIO;
+    let SMALL_FS = BOX * SMALL_FS_RATIO;
+    let NUDGE = BOX * NUDGE_RATIO;
+
+    const ctx = canvas.getContext('2d');
+    const sl = document.getElementById('sl');
+    const stxt = document.getElementById('stxt');
+    const dt = document.getElementById('dt');
+    const e1 = document.getElementById('e1');
+    const e2 = document.getElementById('e2');
+    const l1 = document.getElementById('l1');
+    const l2 = document.getElementById('l2');
+    const p1 = document.getElementById('p1');
+    const p2 = document.getElementById('p2');
+    const flash = document.getElementById('flash');
+    const shutTop = document.getElementById('shutTop');
+    const shutBot = document.getElementById('shutBot');
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function drawAF(cx) {
+      ctx.clearRect(0, 0, BOX, BOX);
+      ctx.font = `900 ${BIG_FS}px Georgia, serif`;
+      ctx.textBaseline = 'alphabetic';
+      const m = ctx.measureText('AF');
+      const tw = m.actualBoundingBoxRight - m.actualBoundingBoxLeft;
+      const x = cx - m.actualBoundingBoxLeft - tw / 2;
+      const bl = BOX / 2 + BIG_FS * 0.36;
+      ctx.fillStyle = '#f0ede8';
+      ctx.fillText('AF', x, bl);
+      const fRight = x + ctx.measureText('A').width + ctx.measureText('F').width;
+      const dotR = BIG_FS * DOT;
+      ctx.beginPath();
+      ctx.arc(fRight - dotR * 1.1, bl - dotR * 1.1, dotR, 0, Math.PI * 2);
+      ctx.fillStyle = '#a8d5b5';
+      ctx.fill();
+    }
+
+    function getAFVW() {
+      ctx.font = `900 ${BIG_FS}px Georgia, serif`;
+      const m = ctx.measureText('AF');
+      return m.actualBoundingBoxRight - m.actualBoundingBoxLeft;
+    }
+
+    function setSS(fs) {
+      stxt.style.fontSize = fs + 'px';
+      dt.style.fontSize = fs + 'px';
+      const ew = Math.round(fs * 0.76), eh = Math.round(fs * 0.93);
+      const pw = Math.round(fs * 0.3), pb = Math.round(fs * 0.1);
+      [e1, e2].forEach(e => { e.style.width = ew + 'px'; e.style.height = eh + 'px'; e.style.paddingBottom = pb + 'px'; });
+      [p1, p2].forEach(p => { p.style.width = pw + 'px'; p.style.height = pw + 'px'; });
+    }
+
+    function ease(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+
+    function animShrink(f, t, ms) {
+      const s = performance.now();
+      return new Promise(r => {
+        function tick(n) { const pct = Math.min((n - s) / ms, 1), e = ease(pct); setSS(f + (t - f) * e); pct < 1 ? requestAnimationFrame(tick) : (setSS(t), r()); }
+        requestAnimationFrame(tick);
+      });
+    }
+    function animAF(sc, ec, ms) {
+      const s = performance.now();
+      return new Promise(r => {
+        function tick(n) { const pct = Math.min((n - s) / ms, 1), e = ease(pct); drawAF(sc + (ec - sc) * e); pct < 1 ? requestAnimationFrame(tick) : r(); }
+        requestAnimationFrame(tick);
+      });
+    }
+    function animSL(fl, tl, ms) {
+      const s = performance.now();
+      return new Promise(r => {
+        function tick(n) { const pct = Math.min((n - s) / ms, 1), e = ease(pct); sl.style.left = (fl + (tl - fl) * e) + 'px'; pct < 1 ? requestAnimationFrame(tick) : (sl.style.left = tl + 'px', r()); }
+        requestAnimationFrame(tick);
+      });
+    }
+    function shutter(closing) {
+      return new Promise(r => {
+        shutTop.style.transition = `height ${SHUTTER_MS}ms linear`;
+        shutBot.style.transition = `height ${SHUTTER_MS}ms linear`;
+        shutTop.style.height = closing ? '50%' : '0';
+        shutBot.style.height = closing ? '50%' : '0';
+        setTimeout(r, SHUTTER_MS);
+      });
+    }
+    function blink() {
+      return new Promise(async r => {
+        l1.style.transition = 'height 0.11s ease-in'; l2.style.transition = 'height 0.11s ease-in';
+        l1.style.height = '110%'; l2.style.height = '110%';
+        await sleep(120);
+        l1.style.transition = 'height 0.11s ease-out'; l2.style.transition = 'height 0.11s ease-out';
+        l1.style.height = '0'; l2.style.height = '0';
+        await sleep(130); r();
+      });
+    }
+
+    async function run() {
+      flash.style.transition = 'none'; flash.style.opacity = '0';
+      shutTop.style.transition = 'none'; shutBot.style.transition = 'none';
+      shutTop.style.height = '0'; shutBot.style.height = '0';
+      l1.style.transition = 'none'; l2.style.transition = 'none';
+      l1.style.height = '0'; l2.style.height = '0';
+      setSS(BIG_FS);
+      sl.style.opacity = '0'; sl.style.left = (BOX + 400) + 'px';
+      sl.style.top = '50%'; sl.style.transform = 'translateY(-50%)';
+      drawAF(BOX / 2 + NUDGE);
+      await sleep(AF_HOLD);
+      sl.style.opacity = '1'; await sleep(8);
+      setSS(SMALL_FS); await sleep(8);
+      const sw = sl.offsetWidth, sh = sl.offsetHeight;
+      const fl = (BOX - sw) / 2 + NUDGE, ft = (BOX - sh) / 2;
+      setSS(BIG_FS); await sleep(8);
+      sl.style.left = BOX + 'px';
+      Promise.all([
+        animAF(BOX / 2 + NUDGE, -(getAFVW() / 2 + 40), SLIDE_MS),
+        animSL(BOX, fl, SLIDE_MS),
+        animShrink(BIG_FS, SMALL_FS, SLIDE_MS)
+      ]);
+      await sleep(SLIDE_MS + 60);
+      setSS(SMALL_FS); await sleep(8);
+      sl.style.left = ((BOX - sl.offsetWidth) / 2 + NUDGE) + 'px';
+      sl.style.top = ((BOX - sl.offsetHeight) / 2) + 'px';
+      sl.style.transform = 'none';
+      ctx.clearRect(0, 0, BOX, BOX);
+      await sleep(80);
+      await blink(); await sleep(340); await blink(); await sleep(500);
+      flash.style.transition = 'opacity 0.05s ease-in'; flash.style.opacity = '0.9';
+      await sleep(55);
+      flash.style.transition = 'opacity 0.2s ease-out'; flash.style.opacity = '0';
+      await sleep(40);
+      await shutter(true); await sleep(80);
+      sl.style.opacity = '0'; sl.style.left = (BOX + 400) + 'px';
+      sl.style.top = '50%'; sl.style.transform = 'translateY(-50%)';
+      l1.style.transition = 'none'; l2.style.transition = 'none';
+      l1.style.height = '0'; l2.style.height = '0';
+      setSS(BIG_FS); drawAF(BOX / 2 + NUDGE);
+      await sleep(260); await shutter(false); await sleep(950);
+      run();
+    }
+
+    run();
+  </script>
+</body>
+</html>
